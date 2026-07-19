@@ -1,0 +1,225 @@
+{
+  "settings": {
+    "logoUrl": "/uploads/logo.svg",
+    "contactPhone": "+1 (555) 019-2834",
+    "contactEmail": "hello@technologyprofessional.ai",
+    "resumeUrl": "/uploads/resume.pdf",
+    "linkedinUrl": "https://linkedin.com/in/technologyprofessional",
+    "githubUrl": "https://github.com/technologyprofessional",
+    "twitterUrl": "https://twitter.com/ai_practitioner",
+    "otherSocials": {},
+    "copyrightText": "© 2026 AI Practitioner. All rights reserved.",
+    "passwordHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+    "seoMetadata": {
+      "title": "AI Practitioner & Technology Professional Portfolio",
+      "description": "Portfolio of an expert AI practitioner specializing in LLMs, agentic RAG, cloud scaling, and computer vision.",
+      "keywords": "AI, Machine Learning, LLM, Agentic RAG, Cloud Architect, React, Next.js",
+      "ogImage": "/uploads/og-image.jpg"
+    },
+    "themeSettings": {
+      "defaultTheme": "dark",
+      "accentColor": "#3b82f6"
+    }
+  },
+  "navbarItems": [
+    {
+      "id": "1",
+      "label": "Home",
+      "href": "#home",
+      "displayOrder": 1,
+      "isVisible": true
+    },
+    {
+      "id": "2",
+      "label": "Achievements",
+      "href": "#achievements",
+      "displayOrder": 2,
+      "isVisible": true
+    },
+    {
+      "id": "3",
+      "label": "Projects",
+      "href": "#projects",
+      "displayOrder": 3,
+      "isVisible": true
+    },
+    {
+      "id": "4",
+      "label": "Experience",
+      "href": "#experience",
+      "displayOrder": 4,
+      "isVisible": true
+    },
+    {
+      "id": "5",
+      "label": "Services",
+      "href": "#services",
+      "displayOrder": 5,
+      "isVisible": true
+    },
+    {
+      "id": "6",
+      "label": "Contact",
+      "href": "#contact",
+      "displayOrder": 6,
+      "isVisible": true
+    }
+  ],
+  "hero": {
+    "heading": "Architecting Autonomous Intelligent Systems",
+    "introduction": "I design, deploy, and scale production-grade AI agents, LLM architectures, and high-performance machine learning pipelines for complex enterprise workloads.",
+    "animationType": "particles",
+    "logoUrl": "/uploads/logo.svg",
+    "ctaPrimaryText": "Explore Projects",
+    "ctaPrimaryHref": "#projects",
+    "ctaSecondaryText": "Get In Touch",
+    "ctaSecondaryHref": "#contact"
+  },
+  "achievements": [
+    {
+      "id": "a1",
+      "title": "Professional Cloud Architect",
+      "issuingOrg": "Google Cloud",
+      "issueDate": "2025-06",
+      "description": "Validation of expertise in designing, developing, and managing robust, secure, scalable, and highly available GCP solutions.",
+      "imageUrl": "/uploads/gcp-architect.jpg",
+      "credentialUrl": "https://google.com/certification",
+      "displayOrder": 1,
+      "isVisible": true
+    },
+    {
+      "id": "a2",
+      "title": "TensorFlow Developer Certificate",
+      "issuingOrg": "TensorFlow / Google",
+      "issueDate": "2024-03",
+      "description": "Demonstrated proficiency in building and training machine learning models using TensorFlow, including deep learning, computer vision, and NLP.",
+      "imageUrl": "/uploads/tensorflow-cert.jpg",
+      "credentialUrl": "https://tensorflow.org",
+      "displayOrder": 2,
+      "isVisible": true
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "title": "Agentic RAG Engine",
+      "description": "An autonomous Retrieval-Augmented Generation system featuring self-querying, hybrid semantic search, cross-encoder reranking, and web search fallback logic.",
+      "technologies": [
+        "Next.js",
+        "FastAPI",
+        "LangChain",
+        "Pinecone",
+        "OpenAI"
+      ],
+      "imageUrl": "/uploads/proj-rag.jpg",
+      "githubUrl": "https://github.com/technologyprofessional/agentic-rag",
+      "liveUrl": "https://rag-demo.technologyprofessional.ai",
+      "docUrl": "https://docs.technologyprofessional.ai/rag",
+      "displayOrder": 1,
+      "isVisible": true
+    },
+    {
+      "id": "p2",
+      "title": "Distributed LLM Router",
+      "description": "A load balancing gateway for LLM requests that optimizes latency, handles provider fallbacks (OpenAI, Anthropic, Gemini), and caches queries semantically.",
+      "technologies": [
+        "Go",
+        "Redis",
+        "Docker",
+        "Kubernetes",
+        "HuggingFace"
+      ],
+      "imageUrl": "/uploads/proj-router.jpg",
+      "githubUrl": "https://github.com/technologyprofessional/llm-router",
+      "liveUrl": "https://router-demo.technologyprofessional.ai",
+      "displayOrder": 2,
+      "isVisible": true
+    }
+  ],
+  "experiences": [
+    {
+      "id": "e1",
+      "companyName": "NeuralFlow Solutions",
+      "position": "Lead AI Architect",
+      "duration": "2024 - Present",
+      "description": "Lead the R&D and deployment of agentic workflows. Optimized custom embeddings pipelines and reduced inference latency by 42% through local caching and model quantization.",
+      "skills": [
+        "LLMs",
+        "Agentic Workflows",
+        "Vector DBs",
+        "PyTorch",
+        "AWS"
+      ],
+      "logoUrl": "/uploads/logo-neuralflow.png",
+      "displayOrder": 1,
+      "isVisible": true
+    },
+    {
+      "id": "e2",
+      "companyName": "CloudScale Technologies",
+      "position": "Senior ML Engineer",
+      "duration": "2022 - 2024",
+      "description": "Designed and productionized real-time computer vision inference systems at scale. Automated pipeline orchestration using Kubernetes and Kubeflow.",
+      "skills": [
+        "Computer Vision",
+        "Kubernetes",
+        "FastAPI",
+        "TensorFlow",
+        "GCP"
+      ],
+      "logoUrl": "/uploads/logo-cloudscale.png",
+      "displayOrder": 2,
+      "isVisible": true
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "AI Engineering",
+      "displayOrder": 1
+    },
+    {
+      "id": "cat2",
+      "name": "Cloud Architecture",
+      "displayOrder": 2
+    },
+    {
+      "id": "cat3",
+      "name": "Strategic Advisory",
+      "displayOrder": 3
+    }
+  ],
+  "services": [
+    {
+      "id": "s1",
+      "categoryId": "cat1",
+      "name": "Custom LLM & RAG Orchestration",
+      "shortDescription": "Build domain-specific LLM applications and agent systems integrated with your company database.",
+      "fullDescription": "We build enterprise-grade retrieval-augmented generation systems and agentic workflows. This includes custom document chunking pipelines, embedding fine-tuning, metadata filtering, semantic cache implementations, and robust evaluation suites. Each system is designed with strict boundaries to eliminate hallucinations and secure proprietary data.",
+      "imageUrl": "/uploads/srv-llm.jpg",
+      "availabilityStatus": "available",
+      "duration": "4-8 weeks",
+      "pricing": "From $8,500",
+      "btnText": "Avail Service",
+      "btnLink": "#contact",
+      "displayOrder": 1,
+      "isVisible": true
+    },
+    {
+      "id": "s2",
+      "categoryId": "cat2",
+      "name": "Scalable ML Infrastructure Audit",
+      "shortDescription": "Audit your current inference/training infrastructure and design a cost-efficient cloud migration strategy.",
+      "fullDescription": "Complete audit of your existing model hosting setup. We review GPU utilization, cold-start latencies, serverless inference bottlenecks, and container scheduling. You will receive an actionable terraform-based deployment design that cuts monthly cloud billing by up to 50% while scaling smoothly under traffic spikes.",
+      "imageUrl": "/uploads/srv-infra.jpg",
+      "availabilityStatus": "available",
+      "duration": "2 weeks",
+      "pricing": "From $4,000",
+      "btnText": "Avail Service",
+      "btnLink": "#contact",
+      "displayOrder": 2,
+      "isVisible": true
+    }
+  ],
+  "mediaFiles": []
+}

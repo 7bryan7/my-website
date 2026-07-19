@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+      <rect width="1200" height="630" fill="#030712" />
+      <circle cx="1000" cy="150" r="300" fill="#2563eb" opacity="0.15" filter="blur(80px)" />
+      <circle cx="100" cy="500" r="250" fill="#60a5fa" opacity="0.1" filter="blur(65px)" />
+      <text x="100" y="260" fill="#ffffff" font-family="sans-serif" font-size="54" font-weight="bold">AI Practitioner</text>
+      <text x="100" y="330" fill="#3b82f6" font-family="sans-serif" font-size="32" font-weight="semibold">&amp; Technology Professional</text>
+      <text x="100" y="420" fill="#94a3b8" font-family="sans-serif" font-size="20">Large Language Models • Agentic Workflows • Distributed ML Scaling</text>
+      <rect x="100" y="480" width="220" height="50" rx="6" fill="#2563eb" />
+      <text x="210" y="512" fill="#ffffff" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">View Portfolio</text>
+    </svg>
