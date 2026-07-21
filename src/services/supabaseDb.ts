@@ -31,18 +31,18 @@ const mapSettingsToDb = (s: Partial<SiteSettings>) => ({
 });
 
 const mapSettingsFromDb = (row: any): SiteSettings => ({
-  logoUrl: row.logo_url,
-  contactPhone: row.contact_phone,
-  contactEmail: row.contact_email,
-  resumeUrl: row.resume_url,
-  linkedinUrl: row.linkedin_url,
-  githubUrl: row.github_url,
-  twitterUrl: row.twitter_url,
-  otherSocials: row.other_socials || {},
-  copyrightText: row.copyright_text,
-  passwordHash: row.password_hash,
-  seoMetadata: row.seo_metadata || {},
-  themeSettings: row.theme_settings || {}
+  logoUrl: row?.logo_url || '/uploads/logo.svg',
+  contactPhone: row?.contact_phone || '',
+  contactEmail: row?.contact_email || '',
+  resumeUrl: row?.resume_url || '',
+  linkedinUrl: row?.linkedin_url || '',
+  githubUrl: row?.github_url || '',
+  twitterUrl: row?.twitter_url || '',
+  otherSocials: row?.other_socials || {},
+  copyrightText: row?.copyright_text || '',
+  passwordHash: row?.password_hash || '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
+  seoMetadata: row?.seo_metadata || {},
+  themeSettings: row?.theme_settings || {}
 });
 
 const mapNavbarToDb = (item: NavbarItem) => ({
@@ -54,11 +54,11 @@ const mapNavbarToDb = (item: NavbarItem) => ({
 });
 
 const mapNavbarFromDb = (row: any): NavbarItem => ({
-  id: row.id,
-  label: row.label,
-  href: row.href,
-  displayOrder: row.display_order,
-  isVisible: row.is_visible
+  id: row?.id || '',
+  label: row?.label || '',
+  href: row?.href || '#',
+  displayOrder: row?.display_order ?? 1,
+  isVisible: row?.is_visible ?? true
 });
 
 const mapHeroToDb = (h: Partial<HeroSection>) => ({
@@ -73,14 +73,14 @@ const mapHeroToDb = (h: Partial<HeroSection>) => ({
 });
 
 const mapHeroFromDb = (row: any): HeroSection => ({
-  heading: row.heading,
-  introduction: row.introduction,
-  animationType: row.animation_type,
-  logoUrl: row.logo_url,
-  ctaPrimaryText: row.cta_primary_text,
-  ctaPrimaryHref: row.cta_primary_href,
-  ctaSecondaryText: row.cta_secondary_text,
-  ctaSecondaryHref: row.cta_secondary_href
+  heading: row?.heading || '',
+  introduction: row?.introduction || '',
+  animationType: row?.animation_type || 'particles',
+  logoUrl: row?.logo_url || '/uploads/logo.svg',
+  ctaPrimaryText: row?.cta_primary_text || 'Explore',
+  ctaPrimaryHref: row?.cta_primary_href || '#projects',
+  ctaSecondaryText: row?.cta_secondary_text || 'Contact',
+  ctaSecondaryHref: row?.cta_secondary_href || '#contact'
 });
 
 const mapAchievementToDb = (a: Achievement) => ({
@@ -96,15 +96,15 @@ const mapAchievementToDb = (a: Achievement) => ({
 });
 
 const mapAchievementFromDb = (row: any): Achievement => ({
-  id: row.id,
-  title: row.title,
-  issuingOrg: row.issuing_org,
-  issueDate: row.issue_date,
-  description: row.description,
-  imageUrl: row.image_url,
-  credentialUrl: row.credential_url,
-  displayOrder: row.display_order,
-  isVisible: row.is_visible
+  id: row?.id || '',
+  title: row?.title || '',
+  issuingOrg: row?.issuing_org || '',
+  issueDate: row?.issue_date || '',
+  description: row?.description || '',
+  imageUrl: row?.image_url || '',
+  credentialUrl: row?.credential_url || '',
+  displayOrder: row?.display_order ?? 1,
+  isVisible: row?.is_visible ?? true
 });
 
 const mapProjectToDb = (p: Project) => ({
@@ -121,16 +121,16 @@ const mapProjectToDb = (p: Project) => ({
 });
 
 const mapProjectFromDb = (row: any): Project => ({
-  id: row.id,
-  title: row.title,
-  description: row.description,
-  technologies: row.technologies || [],
-  imageUrl: row.image_url,
-  githubUrl: row.github_url,
-  liveUrl: row.live_url,
-  docUrl: row.doc_url,
-  displayOrder: row.display_order,
-  isVisible: row.is_visible
+  id: row?.id || '',
+  title: row?.title || '',
+  description: row?.description || '',
+  technologies: row?.technologies || [],
+  imageUrl: row?.image_url || '',
+  githubUrl: row?.github_url || '',
+  liveUrl: row?.live_url || '',
+  docUrl: row?.doc_url || '',
+  displayOrder: row?.display_order ?? 1,
+  isVisible: row?.is_visible ?? true
 });
 
 const mapExperienceToDb = (e: Experience) => ({
@@ -146,15 +146,15 @@ const mapExperienceToDb = (e: Experience) => ({
 });
 
 const mapExperienceFromDb = (row: any): Experience => ({
-  id: row.id,
-  companyName: row.company_name,
-  position: row.position,
-  duration: row.duration,
-  description: row.description,
-  skills: row.skills || [],
-  logoUrl: row.logo_url,
-  displayOrder: row.display_order,
-  isVisible: row.is_visible
+  id: row?.id || '',
+  companyName: row?.company_name || '',
+  position: row?.position || '',
+  duration: row?.duration || '',
+  description: row?.description || '',
+  skills: row?.skills || [],
+  logoUrl: row?.logo_url || '',
+  displayOrder: row?.display_order ?? 1,
+  isVisible: row?.is_visible ?? true
 });
 
 const mapServiceToDb = (s: Service) => ({
@@ -174,28 +174,28 @@ const mapServiceToDb = (s: Service) => ({
 });
 
 const mapServiceFromDb = (row: any): Service => ({
-  id: row.id,
-  categoryId: row.category_id,
-  name: row.name,
-  shortDescription: row.short_description,
-  fullDescription: row.full_description,
-  imageUrl: row.image_url,
-  availabilityStatus: row.availability_status,
-  duration: row.duration,
-  pricing: row.pricing,
-  btnText: row.btn_text,
-  btnLink: row.btn_link,
-  displayOrder: row.display_order,
-  isVisible: row.is_visible
+  id: row?.id || '',
+  categoryId: row?.category_id || '',
+  name: row?.name || '',
+  shortDescription: row?.short_description || '',
+  fullDescription: row?.full_description || '',
+  imageUrl: row?.image_url || '',
+  availabilityStatus: row?.availability_status || 'available',
+  duration: row?.duration || '',
+  pricing: row?.pricing || '',
+  btnText: row?.btn_text || 'Avail Service',
+  btnLink: row?.btn_link || '#contact',
+  displayOrder: row?.display_order ?? 1,
+  isVisible: row?.is_visible ?? true
 });
 
 const mapMediaFromDb = (row: any): MediaFile => ({
-  id: row.id,
-  filename: row.filename,
-  filepath: row.filepath,
-  fileType: row.file_type,
-  sizeBytes: row.size_bytes,
-  createdAt: row.created_at
+  id: row?.id || '',
+  filename: row?.filename || '',
+  filepath: row?.filepath || '',
+  fileType: row?.file_type || '',
+  sizeBytes: row?.size_bytes || 0,
+  createdAt: row?.created_at || new Date().toISOString()
 });
 
 const mapMediaToDb = (m: MediaFile) => ({
@@ -215,21 +215,31 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getSettings(): Promise<SiteSettings> {
-    const { data, error } = await supabase!
-      .from('settings')
-      .select('*')
-      .eq('id', 'default')
-      .single();
+    try {
+      const { data, error } = await supabase!
+        .from('settings')
+        .select('*')
+        .eq('id', 'default')
+        .maybeSingle();
 
-    if (error || !data) {
-      // Seed fallback if settings row does not exist
-      const { settings } = await import('./localDb').then(m => new m.LocalDBProvider().getSettings() as any);
-      const dbRow = { id: 'default', ...mapSettingsToDb(settings) };
-      await supabase!.from('settings').upsert(dbRow);
-      return settings;
+      if (error || !data) {
+        const { LocalDBProvider } = await import('./localDb');
+        const defaultSettings = await new LocalDBProvider().getSettings();
+        const dbRow = { id: 'default', ...mapSettingsToDb(defaultSettings) };
+        try {
+          await supabase!.from('settings').upsert(dbRow);
+        } catch (e) {
+          console.warn('Could not auto-seed settings in Supabase:', e);
+        }
+        return defaultSettings;
+      }
+
+      return mapSettingsFromDb(data);
+    } catch (err) {
+      console.error('Error in getSettings:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getSettings();
     }
-
-    return mapSettingsFromDb(data);
   }
 
   async updateSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
@@ -246,22 +256,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getNavbarItems(): Promise<NavbarItem[]> {
-    const { data, error } = await supabase!
-      .from('navbar_items')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('navbar_items')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
-    
-    // Seed default if empty
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getNavbarItems());
-      const dbRows = items.map(mapNavbarToDb);
-      await supabase!.from('navbar_items').insert(dbRows);
-      return items;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getNavbarItems();
+        const dbRows = items.map(mapNavbarToDb);
+        try {
+          await supabase!.from('navbar_items').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed navbar_items in Supabase:', e);
+        }
+        return items;
+      }
+
+      return data.map(mapNavbarFromDb);
+    } catch (err) {
+      console.error('Error in getNavbarItems:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getNavbarItems();
     }
-
-    return data.map(mapNavbarFromDb);
   }
 
   async updateNavbarItems(items: NavbarItem[]): Promise<NavbarItem[]> {
@@ -272,20 +290,31 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getHero(): Promise<HeroSection> {
-    const { data, error } = await supabase!
-      .from('hero_section')
-      .select('*')
-      .eq('id', 'default')
-      .single();
+    try {
+      const { data, error } = await supabase!
+        .from('hero_section')
+        .select('*')
+        .eq('id', 'default')
+        .maybeSingle();
 
-    if (error || !data) {
-      const hero = await import('./localDb').then(m => new m.LocalDBProvider().getHero());
-      const dbRow = { id: 'default', ...mapHeroToDb(hero) };
-      await supabase!.from('hero_section').upsert(dbRow);
-      return hero;
+      if (error || !data) {
+        const { LocalDBProvider } = await import('./localDb');
+        const hero = await new LocalDBProvider().getHero();
+        const dbRow = { id: 'default', ...mapHeroToDb(hero) };
+        try {
+          await supabase!.from('hero_section').upsert(dbRow);
+        } catch (e) {
+          console.warn('Could not auto-seed hero_section in Supabase:', e);
+        }
+        return hero;
+      }
+
+      return mapHeroFromDb(data);
+    } catch (err) {
+      console.error('Error in getHero:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getHero();
     }
-
-    return mapHeroFromDb(data);
   }
 
   async updateHero(hero: Partial<HeroSection>): Promise<HeroSection> {
@@ -302,21 +331,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getAchievements(): Promise<Achievement[]> {
-    const { data, error } = await supabase!
-      .from('achievements')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('achievements')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getAchievements();
+        const dbRows = items.map(mapAchievementToDb);
+        try {
+          await supabase!.from('achievements').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed achievements in Supabase:', e);
+        }
+        return items;
+      }
 
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getAchievements());
-      const dbRows = items.map(mapAchievementToDb);
-      await supabase!.from('achievements').insert(dbRows);
-      return items;
+      return data.map(mapAchievementFromDb);
+    } catch (err) {
+      console.error('Error in getAchievements:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getAchievements();
     }
-
-    return data.map(mapAchievementFromDb);
   }
 
   async saveAchievement(achievement: Achievement): Promise<Achievement> {
@@ -332,7 +370,6 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async reorderAchievements(ids: string[]): Promise<void> {
-    // Perform bulk display order update in transaction/parallel queries
     const updates = ids.map((id, index) => 
       supabase!.from('achievements').update({ display_order: index + 1 }).eq('id', id)
     );
@@ -340,21 +377,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getProjects(): Promise<Project[]> {
-    const { data, error } = await supabase!
-      .from('projects')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('projects')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getProjects();
+        const dbRows = items.map(mapProjectToDb);
+        try {
+          await supabase!.from('projects').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed projects in Supabase:', e);
+        }
+        return items;
+      }
 
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getProjects());
-      const dbRows = items.map(mapProjectToDb);
-      await supabase!.from('projects').insert(dbRows);
-      return items;
+      return data.map(mapProjectFromDb);
+    } catch (err) {
+      console.error('Error in getProjects:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getProjects();
     }
-
-    return data.map(mapProjectFromDb);
   }
 
   async saveProject(project: Project): Promise<Project> {
@@ -377,21 +423,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getExperiences(): Promise<Experience[]> {
-    const { data, error } = await supabase!
-      .from('experiences')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('experiences')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getExperiences();
+        const dbRows = items.map(mapExperienceToDb);
+        try {
+          await supabase!.from('experiences').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed experiences in Supabase:', e);
+        }
+        return items;
+      }
 
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getExperiences());
-      const dbRows = items.map(mapExperienceToDb);
-      await supabase!.from('experiences').insert(dbRows);
-      return items;
+      return data.map(mapExperienceFromDb);
+    } catch (err) {
+      console.error('Error in getExperiences:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getExperiences();
     }
-
-    return data.map(mapExperienceFromDb);
   }
 
   async saveExperience(experience: Experience): Promise<Experience> {
@@ -414,21 +469,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getCategories(): Promise<Category[]> {
-    const { data, error } = await supabase!
-      .from('categories')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('categories')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getCategories();
+        const dbRows = items.map(c => ({ id: c.id, name: c.name, display_order: c.displayOrder }));
+        try {
+          await supabase!.from('categories').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed categories in Supabase:', e);
+        }
+        return items;
+      }
 
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getCategories());
-      const dbRows = items.map(c => ({ id: c.id, name: c.name, display_order: c.displayOrder }));
-      await supabase!.from('categories').insert(dbRows);
-      return items;
+      return data.map(row => ({ id: row?.id || '', name: row?.name || '', displayOrder: row?.display_order ?? 1 }));
+    } catch (err) {
+      console.error('Error in getCategories:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getCategories();
     }
-
-    return data.map(row => ({ id: row.id, name: row.name, displayOrder: row.display_order }));
   }
 
   async saveCategory(category: Category): Promise<Category> {
@@ -445,21 +509,30 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getServices(): Promise<Service[]> {
-    const { data, error } = await supabase!
-      .from('services')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase!
+        .from('services')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) throw error;
+      if (error || !data || data.length === 0) {
+        const { LocalDBProvider } = await import('./localDb');
+        const items = await new LocalDBProvider().getServices();
+        const dbRows = items.map(mapServiceToDb);
+        try {
+          await supabase!.from('services').insert(dbRows);
+        } catch (e) {
+          console.warn('Could not auto-seed services in Supabase:', e);
+        }
+        return items;
+      }
 
-    if (!data || data.length === 0) {
-      const items = await import('./localDb').then(m => new m.LocalDBProvider().getServices());
-      const dbRows = items.map(mapServiceToDb);
-      await supabase!.from('services').insert(dbRows);
-      return items;
+      return data.map(mapServiceFromDb);
+    } catch (err) {
+      console.error('Error in getServices:', err);
+      const { LocalDBProvider } = await import('./localDb');
+      return new LocalDBProvider().getServices();
     }
-
-    return data.map(mapServiceFromDb);
   }
 
   async saveService(service: Service): Promise<Service> {
@@ -482,13 +555,18 @@ export class SupabaseDBProvider implements DBProvider {
   }
 
   async getMediaFiles(): Promise<MediaFile[]> {
-    const { data, error } = await supabase!
-      .from('media_library')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase!
+        .from('media_library')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data.map(mapMediaFromDb);
+      if (error || !data) return [];
+      return data.map(mapMediaFromDb);
+    } catch (err) {
+      console.error('Error in getMediaFiles:', err);
+      return [];
+    }
   }
 
   async saveMediaFile(file: MediaFile): Promise<MediaFile> {
