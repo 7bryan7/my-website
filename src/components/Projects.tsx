@@ -1,5 +1,7 @@
 // src/components/Projects.tsx
 
+'use client';
+
 import { Project } from '@/services/db';
 
 interface ProjectsProps {

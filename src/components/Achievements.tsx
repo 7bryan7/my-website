@@ -1,5 +1,7 @@
 // src/components/Achievements.tsx
 
+'use client';
+
 import { Achievement } from '@/services/db';
 
 interface AchievementsProps {

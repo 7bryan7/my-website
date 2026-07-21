@@ -1,5 +1,7 @@
 // src/components/Experience.tsx
 
+'use client';
+
 import { Experience } from '@/services/db';
 
 interface ExperienceProps {
