@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   // UI state
   const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Editor state modals
   const [activeModal, setActiveModal] = useState<{
@@ -161,7 +162,9 @@ export default function AdminDashboard() {
 
   // 4. Save Operations
   const saveCmsData = async (action: string, payload: any) => {
+    setIsSaving(true);
     try {
+      console.log(`[CMS Save] Action: ${action}`, payload);
       const res = await fetch('/api/cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,11 +173,14 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save changes');
       showToast('Changes saved successfully');
-      fetchDashboardData();
+      console.log(`[CMS Save] Action ${action} succeeded.`);
+      await fetchDashboardData();
       return data.result;
     } catch (err: any) {
+      console.error(`[CMS Save] Action ${action} failed:`, err);
       showToast(err.message || 'Error saving changes');
-      console.error(err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1397,7 +1403,9 @@ export default function AdminDashboard() {
                   </label>
                   <span className="form-label" style={{ display: 'inline' }}>Publish instantly</span>
                 </div>
-                <button type="submit" className="btn btn-primary">Save Certificate</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Certificate'}
+                </button>
               </form>
             )}
 
@@ -1497,7 +1505,9 @@ export default function AdminDashboard() {
                   </label>
                   <span className="form-label" style={{ display: 'inline' }}>Publish project</span>
                 </div>
-                <button type="submit" className="btn btn-primary">Save Project</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Project'}
+                </button>
               </form>
             )}
 
@@ -1589,7 +1599,9 @@ export default function AdminDashboard() {
                   </label>
                   <span className="form-label" style={{ display: 'inline' }}>Publish timeline role</span>
                 </div>
-                <button type="submit" className="btn btn-primary">Save Experience</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Experience'}
+                </button>
               </form>
             )}
 
@@ -1712,7 +1724,9 @@ export default function AdminDashboard() {
                   </label>
                   <span className="form-label" style={{ display: 'inline' }}>Publish service offering</span>
                 </div>
-                <button type="submit" className="btn btn-primary">Save Service Offering</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Service Offering'}
+                </button>
               </form>
             )}
 
