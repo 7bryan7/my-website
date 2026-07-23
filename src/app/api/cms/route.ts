@@ -88,6 +88,11 @@ export async function POST(req: Request) {
 
     switch (action) {
       case 'updateSettings':
+        if (payload && payload.passwordPlain) {
+          const { hashPassword } = await import('@/services/auth');
+          payload.passwordHash = hashPassword(payload.passwordPlain);
+          delete payload.passwordPlain;
+        }
         result = await db.updateSettings(payload);
         break;
       case 'updateNavbar':

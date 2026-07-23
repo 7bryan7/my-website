@@ -12,6 +12,17 @@ import './admin.css';
 
 type ActiveTab = 'overview' | 'settings' | 'navbar' | 'achievements' | 'projects' | 'experience' | 'services' | 'media' | 'profile';
 
+function generateUUID(): string {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   
@@ -231,14 +242,7 @@ export default function AdminDashboard() {
       return;
     }
     
-    // Hash new password
-    // Cryptography using browser WebCrypto SHA-256
-    const msgUint8 = new TextEncoder().encode(passwordForm.new);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const newHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    await saveCmsData('updateSettings', { passwordHash: newHash });
+    await saveCmsData('updateSettings', { passwordPlain: passwordForm.new } as any);
     setPasswordForm({ current: '', new: '', confirm: '' });
     showToast('Password changed successfully');
   };
@@ -802,7 +806,7 @@ export default function AdminDashboard() {
                     <button 
                       onClick={() => setActiveModal({
                         type: 'achievement', mode: 'add', item: {
-                          id: crypto.randomUUID(), title: '', issuingOrg: '', issueDate: '', description: '', imageUrl: '', credentialUrl: '', displayOrder: achievements.length + 1, isVisible: true
+                          id: generateUUID(), title: '', issuingOrg: '', issueDate: '', description: '', imageUrl: '', credentialUrl: '', displayOrder: achievements.length + 1, isVisible: true
                         }
                       })}
                       className="btn btn-primary"
@@ -885,7 +889,7 @@ export default function AdminDashboard() {
                     <button 
                       onClick={() => setActiveModal({
                         type: 'project', mode: 'add', item: {
-                          id: crypto.randomUUID(), title: '', description: '', technologies: [], imageUrl: '', githubUrl: '', liveUrl: '', docUrl: '', displayOrder: projects.length + 1, isVisible: true
+                          id: generateUUID(), title: '', description: '', technologies: [], imageUrl: '', githubUrl: '', liveUrl: '', docUrl: '', displayOrder: projects.length + 1, isVisible: true
                         }
                       })}
                       className="btn btn-primary"
@@ -973,7 +977,7 @@ export default function AdminDashboard() {
                     <button 
                       onClick={() => setActiveModal({
                         type: 'experience', mode: 'add', item: {
-                          id: crypto.randomUUID(), companyName: '', position: '', duration: '', description: '', skills: [], logoUrl: '', displayOrder: experiences.length + 1, isVisible: true
+                          id: generateUUID(), companyName: '', position: '', duration: '', description: '', skills: [], logoUrl: '', displayOrder: experiences.length + 1, isVisible: true
                         }
                       })}
                       className="btn btn-primary"
@@ -1056,7 +1060,7 @@ export default function AdminDashboard() {
                     <button 
                       onClick={() => setActiveModal({
                         type: 'service', mode: 'add', item: {
-                          id: crypto.randomUUID(), categoryId: categories[0]?.id || '', name: '', shortDescription: '', fullDescription: '', imageUrl: '', availabilityStatus: 'available', duration: '', pricing: '', btnText: 'Avail Service', btnLink: '#contact', displayOrder: services.length + 1, isVisible: true
+                          id: generateUUID(), categoryId: categories[0]?.id || '', name: '', shortDescription: '', fullDescription: '', imageUrl: '', availabilityStatus: 'available', duration: '', pricing: '', btnText: 'Avail Service', btnLink: '#contact', displayOrder: services.length + 1, isVisible: true
                         }
                       })}
                       className="btn btn-primary"
