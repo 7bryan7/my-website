@@ -166,40 +166,51 @@ export default function Hero({ hero }: HeroProps) {
       <div className="pulse-bg-circle glow-2" />
 
       <div className="container hero-container">
-        <div className="hero-content">
-          {hero.logoUrl && (
-            <div className="hero-logo-wrapper">
-              <img src={hero.logoUrl} alt="Logo" className="hero-profile-logo" />
-            </div>
-          )}
-          
-          <h1 className="hero-title text-balance">
-            {hero.heading}
-          </h1>
-          
-          <p className="hero-desc text-balance">
-            {hero.introduction}
-          </p>
+        <div className="hero-grid">
+          <div className="hero-left-column">
+            <div className="hero-content">
+              {hero.logoUrl && (
+                <div className="hero-logo-wrapper">
+                  <img src={hero.logoUrl} alt="Logo" className="hero-profile-logo" />
+                </div>
+              )}
+              
+              <h1 className="hero-title text-balance">
+                <span className="hero-name">Bryan Roger B</span>
+                <span className="hero-subtitle">{hero.heading}</span>
+              </h1>
+              
+              <p className="hero-desc text-balance">
+                {hero.introduction}
+              </p>
 
-          <div className="hero-ctas">
-            <a 
-              href={hero.ctaPrimaryHref} 
-              onClick={(e) => handleCtaClick(e, hero.ctaPrimaryHref)}
-              className="btn btn-primary"
-            >
-              {hero.ctaPrimaryText}
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="cta-icon">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
-            </a>
-            
-            <a 
-              href={hero.ctaSecondaryHref} 
-              onClick={(e) => handleCtaClick(e, hero.ctaSecondaryHref)}
-              className="btn btn-secondary"
-            >
-              {hero.ctaSecondaryText}
-            </a>
+              <div className="hero-ctas">
+                <a 
+                  href={hero.ctaPrimaryHref} 
+                  onClick={(e) => handleCtaClick(e, hero.ctaPrimaryHref)}
+                  className="btn btn-primary"
+                >
+                  {hero.ctaPrimaryText}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="cta-icon">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                  </svg>
+                </a>
+                
+                <a 
+                  href={hero.ctaSecondaryHref} 
+                  onClick={(e) => handleCtaClick(e, hero.ctaSecondaryHref)}
+                  className="btn btn-secondary"
+                >
+                  {hero.ctaSecondaryText}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-right-column">
+            <div className="hero-animation-container">
+              {/* Reserved for future interactive animation component */}
+            </div>
           </div>
         </div>
       </div>
@@ -255,15 +266,28 @@ export default function Hero({ hero }: HeroProps) {
           z-index: 2;
           display: flex;
           align-items: center;
-          justify-content: center;
-          text-align: center;
+          width: 100%;
+        }
+
+        .hero-grid {
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 4rem;
+          width: 100%;
+          align-items: center;
+        }
+
+        .hero-left-column {
+          display: flex;
+          justify-content: flex-start;
+          text-align: left;
         }
 
         .hero-content {
-          max-width: 800px;
+          max-width: 650px;
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-start;
           animation: fadeIn var(--transition-slow) forwards;
         }
 
@@ -284,13 +308,31 @@ export default function Hero({ hero }: HeroProps) {
         }
 
         .hero-title {
-          font-size: 3.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-bottom: 1.5rem;
+          line-height: 1.1;
+        }
+
+        .hero-name {
+          font-size: 4.5rem;
           font-weight: 800;
           letter-spacing: -0.03em;
-          margin-bottom: 1.5rem;
           background: linear-gradient(to right, var(--text-primary) 30%, var(--accent) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          display: block;
+        }
+
+        .hero-subtitle {
+          font-size: 3rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          background: linear-gradient(to right, var(--text-primary) 30%, var(--accent) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          display: block;
         }
 
         .hero-desc {
@@ -304,12 +346,23 @@ export default function Hero({ hero }: HeroProps) {
         .hero-ctas {
           display: flex;
           gap: 1rem;
-          justify-content: center;
+          justify-content: flex-start;
         }
 
         .cta-icon {
           width: 18px;
           height: 18px;
+        }
+
+        .hero-right-column {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .hero-animation-container {
+          width: 100%;
+          height: 400px;
         }
 
         .scroll-indicator {
@@ -350,9 +403,51 @@ export default function Hero({ hero }: HeroProps) {
           100% { transform: translateY(12px); opacity: 0; }
         }
 
+        @media (min-width: 1200px) {
+          .scroll-indicator {
+            left: calc((100vw - 1200px) / 2 + 2rem);
+            transform: none;
+          }
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+          .scroll-indicator {
+            left: 2rem;
+            transform: none;
+          }
+        }
+
+        @media (max-width: 991px) {
+          .hero-grid {
+            grid-template-columns: 1.4fr 0.6fr;
+            gap: 2rem;
+          }
+        }
+
         @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2.5rem;
+          .hero-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-right-column {
+            display: none;
+          }
+
+          .hero-left-column {
+            text-align: center;
+            justify-content: center;
+          }
+
+          .hero-content {
+            align-items: center;
+          }
+
+          .hero-name {
+            font-size: 3rem;
+          }
+          
+          .hero-subtitle {
+            font-size: 2rem;
           }
           
           .hero-desc {
@@ -363,6 +458,7 @@ export default function Hero({ hero }: HeroProps) {
             flex-direction: column;
             width: 100%;
             max-width: 300px;
+            justify-content: center;
           }
         }
       `}</style>
