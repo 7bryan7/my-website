@@ -81,7 +81,7 @@ export default function Navbar({ logoUrl, items }: NavbarProps) {
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="logo-img" />
           ) : (
-            <span className="logo-text">AI Practitioner</span>
+            <span className="logo-text">Bryan Roger B</span>
           )}
         </a>
 

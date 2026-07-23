@@ -1,6 +1,6 @@
 {
   "settings": {
-    "logoUrl": "/uploads/logo.svg",
+    "logoUrl": "",
     "contactPhone": "+1 (555) 019-2834",
     "contactEmail": "hello@technologyprofessional.ai",
     "resumeUrl": "/uploads/resume.pdf",
@@ -69,7 +69,7 @@
     "heading": "Architecting Autonomous Intelligent Systems",
     "introduction": "I design, deploy, and scale production-grade AI agents, LLM architectures, and high-performance machine learning pipelines for complex enterprise workloads.",
     "animationType": "particles",
-    "logoUrl": "/uploads/logo.svg",
+    "logoUrl": "",
     "ctaPrimaryText": "Explore Projects",
     "ctaPrimaryHref": "#projects",
     "ctaSecondaryText": "Get In Touch",

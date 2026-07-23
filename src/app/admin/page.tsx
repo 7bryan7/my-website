@@ -59,6 +59,10 @@ export default function AdminDashboard() {
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Branding upload states
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+
   // Media Batch Upload states
   const [uploadQueue, setUploadQueue] = useState<UploadTask[]>([]);
   const [showUploadProgress, setShowUploadProgress] = useState(false);
@@ -321,6 +325,59 @@ export default function AdminDashboard() {
     if (!files || files.length === 0) return;
     processSelectedFiles(Array.from(files));
     e.target.value = '';
+  };
+
+  const handleBrandingAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'profile') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      alert('File size exceeds the 5MB limit.');
+      return;
+    }
+
+    const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      alert('Only images (JPG/PNG/WEBP/SVG) are allowed.');
+      return;
+    }
+
+    if (type === 'logo') setIsUploadingLogo(true);
+    else setIsUploadingProfile(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('duplicateStrategy', 'replace');
+
+    try {
+      const res = await fetch('/api/media', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      
+      const fileUrl = data.filepath;
+      
+      if (type === 'logo') {
+        if (settings) {
+          setSettings({ ...settings, logoUrl: fileUrl });
+          showToast('Logo uploaded successfully. Save settings to apply.');
+        }
+      } else {
+        if (hero) {
+          setHero({ ...hero, logoUrl: fileUrl });
+          showToast('Profile image uploaded successfully. Save settings to apply.');
+        }
+      }
+    } catch (err: any) {
+      alert(err.message || 'Asset upload failed');
+    } finally {
+      if (type === 'logo') setIsUploadingLogo(false);
+      else setIsUploadingProfile(false);
+      e.target.value = '';
+    }
   };
 
   const handleMediaDragOver = (e: React.DragEvent) => {
@@ -599,6 +656,130 @@ export default function AdminDashboard() {
 
                   <div className="glass-card editor-card">
                     <div className="editor-card-header">
+                      <h3 className="editor-card-title">Website Branding</h3>
+                    </div>
+
+                    <div className="editor-grid-2">
+                      {/* Logo Section */}
+                      <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <label className="form-label">Website Logo (Navbar & Favicon)</label>
+                        
+                        <div className="logo-preview-container" style={{ 
+                          height: '100px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          backgroundColor: 'var(--bg-tertiary)', 
+                          borderRadius: 'var(--radius-md)', 
+                          border: '1px solid var(--border-color)',
+                          overflow: 'hidden'
+                        }}>
+                          {settings.logoUrl ? (
+                            <img src={settings.logoUrl} alt="Website Logo Preview" style={{ maxHeight: '80px', maxWidth: '90%' }} />
+                          ) : (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No logo (Bryan Roger B text fallback)</span>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div className="file-input-wrapper" style={{ flex: 1 }}>
+                            <button className="btn btn-outline" style={{ width: '100%', padding: '0.5rem 1rem' }} disabled={isUploadingLogo}>
+                              {isUploadingLogo ? 'Uploading...' : settings.logoUrl ? 'Replace Logo' : 'Upload Logo'}
+                            </button>
+                            <input 
+                              type="file" 
+                              onChange={(e) => handleBrandingAssetUpload(e, 'logo')} 
+                              accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                              disabled={isUploadingLogo}
+                            />
+                          </div>
+                          {settings.logoUrl && (
+                            <button 
+                              onClick={() => {
+                                setSettings({ ...settings, logoUrl: '' });
+                                showToast('Logo marked for deletion. Save settings to apply.');
+                              }} 
+                              className="btn btn-outline" 
+                              style={{ color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Profile Image Section */}
+                      <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <label className="form-label">Hero Profile Picture</label>
+                        
+                        <div className="logo-preview-container" style={{ 
+                          height: '100px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          backgroundColor: 'var(--bg-tertiary)', 
+                          borderRadius: 'var(--radius-md)', 
+                          border: '1px solid var(--border-color)',
+                          overflow: 'hidden'
+                        }}>
+                          {hero.logoUrl ? (
+                            <img src={hero.logoUrl} alt="Hero Profile Preview" style={{ maxHeight: '80px', maxWidth: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No profile picture (Empty visual circle fallback)</span>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div className="file-input-wrapper" style={{ flex: 1 }}>
+                            <button className="btn btn-outline" style={{ width: '100%', padding: '0.5rem 1rem' }} disabled={isUploadingProfile}>
+                              {isUploadingProfile ? 'Uploading...' : hero.logoUrl ? 'Replace Image' : 'Upload Image'}
+                            </button>
+                            <input 
+                              type="file" 
+                              onChange={(e) => handleBrandingAssetUpload(e, 'profile')} 
+                              accept="image/jpeg,image/png,image/webp"
+                              disabled={isUploadingProfile}
+                            />
+                          </div>
+                          {hero.logoUrl && (
+                            <button 
+                              onClick={() => {
+                                setHero({ ...hero, logoUrl: '' });
+                                showToast('Profile image marked for deletion. Save settings to apply.');
+                              }} 
+                              className="btn btn-outline" 
+                              style={{ color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={async () => {
+                        setIsSaving(true);
+                        try {
+                          await saveCmsData('updateSettings', settings);
+                          await saveCmsData('updateHero', hero);
+                          showToast('Branding settings saved successfully');
+                        } catch (err: any) {
+                          showToast(err.message || 'Failed to save branding');
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      className="btn btn-primary"
+                      style={{ marginTop: '1.5rem' }}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? 'Saving...' : 'Save Branding'}
+                    </button>
+                  </div>
+
+                  <div className="glass-card editor-card">
+                    <div className="editor-card-header">
                       <h3 className="editor-card-title">Hero Header Block</h3>
                     </div>
                     
@@ -634,12 +815,13 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Avatar/Logo Image URL</label>
+                        <label className="form-label">Avatar/Logo Image URL (Editable in Website Branding above)</label>
                         <input 
                           type="text" 
                           value={hero.logoUrl} 
-                          onChange={(e) => setHero({ ...hero, logoUrl: e.target.value })} 
+                          disabled
                           className="form-input" 
+                          style={{ opacity: 0.6, cursor: 'not-allowed' }}
                         />
                       </div>
                     </div>

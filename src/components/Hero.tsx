@@ -236,11 +236,15 @@ export default function Hero({ hero, settings }: HeroProps) {
           <div className="hero-right-column">
             <div className="hero-branding-wrapper" aria-label="Branded profile avatar visual">
               <div className="profile-image-container">
-                <img 
-                  src={hero.logoUrl || '/uploads/logo.svg'} 
-                  alt="Bryan Roger B Profile Picture" 
-                  className="profile-picture" 
-                />
+                {hero.logoUrl ? (
+                  <img 
+                    src={hero.logoUrl} 
+                    alt="Bryan Roger B Profile Picture" 
+                    className="profile-picture" 
+                  />
+                ) : (
+                  <div className="profile-empty-placeholder" />
+                )}
               </div>
 
               {ribbonVisible && (
@@ -448,6 +452,17 @@ export default function Hero({ hero, settings }: HeroProps) {
           border-radius: var(--radius-full);
           object-fit: cover;
           border: 4px solid var(--bg-secondary);
+        }
+
+        .profile-empty-placeholder {
+          width: 100%;
+          height: 100%;
+          border-radius: var(--radius-full);
+          background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.1), rgba(192, 132, 252, 0.1));
+          border: 4px dashed rgba(var(--accent-rgb), 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .flowing-ribbon-container {

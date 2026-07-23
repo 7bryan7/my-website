@@ -15,6 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
       ogImage: '/uploads/og-image.jpg'
     };
 
+    const iconUrl = settings.logoUrl 
+      ? `${settings.logoUrl}?v=${encodeURIComponent(settings.logoUrl)}` 
+      : '/favicon.ico';
+
     return {
       title: {
         default: seo.title,
@@ -23,6 +27,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description: seo.description,
       keywords: seo.keywords,
       metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+      icons: {
+        icon: iconUrl,
+        shortcut: iconUrl,
+        apple: iconUrl
+      },
       alternates: {
         canonical: '/'
       },
@@ -48,14 +57,26 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let faviconUrl = '/favicon.ico';
+  try {
+    const db = await getDB();
+    const settings = await db.getSettings();
+    if (settings.logoUrl) {
+      faviconUrl = `${settings.logoUrl}?v=${encodeURIComponent(settings.logoUrl)}`;
+    }
+  } catch (e) {
+    console.error('Failed to load settings in layout:', e);
+  }
+
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href={faviconUrl} />
         {/* Anti-flash inline script for dark/light theme load */}
         <script
           dangerouslySetInnerHTML={{
