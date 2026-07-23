@@ -59,9 +59,9 @@ export default function AdminDashboard() {
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Branding upload states
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+  // Branding media picker modal states
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<'logo' | 'profile' | null>(null);
+  const [selectedPickerId, setSelectedPickerId] = useState<string | null>(null);
 
   // Media Batch Upload states
   const [uploadQueue, setUploadQueue] = useState<UploadTask[]>([]);
@@ -327,58 +327,7 @@ export default function AdminDashboard() {
     e.target.value = '';
   };
 
-  const handleBrandingAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'profile') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const MAX_FILE_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
-      alert('File size exceeds the 5MB limit.');
-      return;
-    }
-
-    const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      alert('Only images (JPG/PNG/WEBP/SVG) are allowed.');
-      return;
-    }
-
-    if (type === 'logo') setIsUploadingLogo(true);
-    else setIsUploadingProfile(true);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('duplicateStrategy', 'replace');
-
-    try {
-      const res = await fetch('/api/media', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
-      
-      const fileUrl = data.filepath;
-      
-      if (type === 'logo') {
-        if (settings) {
-          setSettings({ ...settings, logoUrl: fileUrl });
-          showToast('Logo uploaded successfully. Save settings to apply.');
-        }
-      } else {
-        if (hero) {
-          setHero({ ...hero, logoUrl: fileUrl });
-          showToast('Profile image uploaded successfully. Save settings to apply.');
-        }
-      }
-    } catch (err: any) {
-      alert(err.message || 'Asset upload failed');
-    } finally {
-      if (type === 'logo') setIsUploadingLogo(false);
-      else setIsUploadingProfile(false);
-      e.target.value = '';
-    }
-  };
+  // Removed local asset uploader to force Media Library selections
 
   const handleMediaDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -674,35 +623,43 @@ export default function AdminDashboard() {
                           border: '1px solid var(--border-color)',
                           overflow: 'hidden'
                         }}>
-                          {settings.logoUrl ? (
-                            <img src={settings.logoUrl} alt="Website Logo Preview" style={{ maxHeight: '80px', maxWidth: '90%' }} />
+                          {settings.otherSocials?.logoMediaId ? (
+                            (() => {
+                              const f = mediaFiles.find(mf => mf.id === settings.otherSocials.logoMediaId);
+                              return f ? (
+                                <img src={f.filepath} alt="Website Logo Preview" style={{ maxHeight: '80px', maxWidth: '90%' }} />
+                              ) : (
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Missing image asset (Text fallback logo)</span>
+                              );
+                            })()
                           ) : (
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No logo (Bryan Roger B text fallback)</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No logo selected (Bryan Roger B text fallback)</span>
                           )}
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <div className="file-input-wrapper" style={{ flex: 1 }}>
-                            <button className="btn btn-outline" style={{ width: '100%', padding: '0.5rem 1rem' }} disabled={isUploadingLogo}>
-                              {isUploadingLogo ? 'Uploading...' : settings.logoUrl ? 'Replace Logo' : 'Upload Logo'}
-                            </button>
-                            <input 
-                              type="file" 
-                              onChange={(e) => handleBrandingAssetUpload(e, 'logo')} 
-                              accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                              disabled={isUploadingLogo}
-                            />
-                          </div>
-                          {settings.logoUrl && (
+                          <button 
+                            onClick={() => {
+                              setSelectedPickerId(settings.otherSocials?.logoMediaId || null);
+                              setMediaPickerTarget('logo');
+                            }}
+                            className="btn btn-outline" 
+                            style={{ flex: 1, padding: '0.5rem 1rem' }}
+                          >
+                            {settings.otherSocials?.logoMediaId ? 'Change Logo' : 'Choose Logo'}
+                          </button>
+                          {settings.otherSocials?.logoMediaId && (
                             <button 
                               onClick={() => {
-                                setSettings({ ...settings, logoUrl: '' });
-                                showToast('Logo marked for deletion. Save settings to apply.');
+                                const updatedSocials = { ...settings.otherSocials };
+                                delete updatedSocials.logoMediaId;
+                                setSettings({ ...settings, logoUrl: '', otherSocials: updatedSocials });
+                                showToast('Logo marked for removal. Save branding to apply.');
                               }} 
                               className="btn btn-outline" 
                               style={{ color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}
                             >
-                              Delete
+                              Clear
                             </button>
                           )}
                         </div>
@@ -722,35 +679,44 @@ export default function AdminDashboard() {
                           border: '1px solid var(--border-color)',
                           overflow: 'hidden'
                         }}>
-                          {hero.logoUrl ? (
-                            <img src={hero.logoUrl} alt="Hero Profile Preview" style={{ maxHeight: '80px', maxWidth: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+                          {settings.otherSocials?.profileMediaId ? (
+                            (() => {
+                              const f = mediaFiles.find(mf => mf.id === settings.otherSocials.profileMediaId);
+                              return f ? (
+                                <img src={f.filepath} alt="Hero Profile Preview" style={{ maxHeight: '80px', maxWidth: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+                              ) : (
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Missing image asset (Empty circle fallback)</span>
+                              );
+                            })()
                           ) : (
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No profile picture (Empty visual circle fallback)</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No profile picture selected (Empty visual circle fallback)</span>
                           )}
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <div className="file-input-wrapper" style={{ flex: 1 }}>
-                            <button className="btn btn-outline" style={{ width: '100%', padding: '0.5rem 1rem' }} disabled={isUploadingProfile}>
-                              {isUploadingProfile ? 'Uploading...' : hero.logoUrl ? 'Replace Image' : 'Upload Image'}
-                            </button>
-                            <input 
-                              type="file" 
-                              onChange={(e) => handleBrandingAssetUpload(e, 'profile')} 
-                              accept="image/jpeg,image/png,image/webp"
-                              disabled={isUploadingProfile}
-                            />
-                          </div>
-                          {hero.logoUrl && (
+                          <button 
+                            onClick={() => {
+                              setSelectedPickerId(settings.otherSocials?.profileMediaId || null);
+                              setMediaPickerTarget('profile');
+                            }}
+                            className="btn btn-outline" 
+                            style={{ flex: 1, padding: '0.5rem 1rem' }}
+                          >
+                            {settings.otherSocials?.profileMediaId ? 'Change Image' : 'Choose Image'}
+                          </button>
+                          {settings.otherSocials?.profileMediaId && (
                             <button 
                               onClick={() => {
+                                const updatedSocials = { ...settings.otherSocials };
+                                delete updatedSocials.profileMediaId;
                                 setHero({ ...hero, logoUrl: '' });
-                                showToast('Profile image marked for deletion. Save settings to apply.');
+                                setSettings({ ...settings, otherSocials: updatedSocials });
+                                showToast('Profile image marked for removal. Save branding to apply.');
                               }} 
                               className="btn btn-outline" 
                               style={{ color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}
                             >
-                              Delete
+                              Clear
                             </button>
                           )}
                         </div>
@@ -2328,6 +2294,144 @@ export default function AdminDashboard() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* Media Library Picker Modal */}
+      {mediaPickerTarget && (
+        <div className="modal-overlay" onClick={() => setMediaPickerTarget(null)}>
+          <div className="modal-content glass-card animate-fade-in" style={{ padding: '2.5rem', maxWidth: '800px', width: '90%', backgroundColor: 'var(--bg-secondary)' }} onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="modal-close-btn"
+              onClick={() => setMediaPickerTarget(null)}
+              style={{ top: '1.5rem', right: '1.5rem' }}
+            >
+              ✕
+            </button>
+
+            <h3 className="editor-card-title" style={{ marginBottom: '1rem' }}>
+              Select {mediaPickerTarget === 'logo' ? 'Website Logo' : 'Hero Profile Image'}
+            </h3>
+            <p className="dashboard-subtitle" style={{ marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+              Choose an existing image from your Media Library.
+            </p>
+
+            <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '2rem' }}>
+              {mediaFiles.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
+                  {mediaFiles.map((file) => {
+                    const isSelected = selectedPickerId === file.id;
+                    return (
+                      <div 
+                        key={file.id} 
+                        onClick={() => setSelectedPickerId(file.id)}
+                        style={{
+                          border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border-color)',
+                          backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-md)',
+                          padding: '0.5rem',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          transition: 'all 0.2s ease',
+                          position: 'relative'
+                        }}
+                      >
+                        {isSelected && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '4px',
+                            backgroundColor: 'var(--accent)',
+                            color: '#ffffff',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            zIndex: 10
+                          }}>
+                            ✓
+                          </div>
+                        )}
+                        <div style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px', backgroundColor: '#00000020', marginBottom: '0.5rem' }}>
+                          {file.fileType.startsWith('image/') ? (
+                            <img src={file.filepath} alt={file.filename} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: '40px', height: '40px', color: 'var(--text-muted)' }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                          )}
+                        </div>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', display: 'block', color: 'var(--text-secondary)' }} title={file.filename}>
+                          {file.filename}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                  <p>No files in your Media Library yet.</p>
+                  <p style={{ fontSize: '0.8rem' }}>Please upload files in the Media Library tab first.</p>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setMediaPickerTarget(null)} 
+                className="btn btn-outline"
+                style={{ padding: '0.5rem 1rem' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  if (!selectedPickerId) return;
+                  const selectedFile = mediaFiles.find(f => f.id === selectedPickerId);
+                  if (selectedFile) {
+                    if (mediaPickerTarget === 'logo') {
+                      if (settings) {
+                        setSettings({
+                          ...settings,
+                          logoUrl: selectedFile.filepath,
+                          otherSocials: {
+                            ...settings.otherSocials,
+                            logoMediaId: selectedFile.id
+                          }
+                        });
+                        showToast('Logo updated. Save branding to persist changes.');
+                      }
+                    } else if (mediaPickerTarget === 'profile') {
+                      if (hero && settings) {
+                        setHero({
+                          ...hero,
+                          logoUrl: selectedFile.filepath
+                        });
+                        setSettings({
+                          ...settings,
+                          otherSocials: {
+                            ...settings.otherSocials,
+                            profileMediaId: selectedFile.id
+                          }
+                        });
+                        showToast('Profile image updated. Save branding to persist changes.');
+                      }
+                    }
+                  }
+                  setMediaPickerTarget(null);
+                }} 
+                className="btn btn-primary"
+                style={{ padding: '0.5rem 1rem' }}
+                disabled={!selectedPickerId}
+              >
+                Use Selected Image
+              </button>
             </div>
           </div>
         </div>

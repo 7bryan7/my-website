@@ -25,7 +25,8 @@ export default async function Home() {
     projects,
     experiences,
     categories,
-    services
+    services,
+    mediaFiles
   ] = await Promise.all([
     db.getSettings(),
     db.getNavbarItems(),
@@ -34,14 +35,25 @@ export default async function Home() {
     db.getProjects(),
     db.getExperiences(),
     db.getCategories(),
-    db.getServices()
+    db.getServices(),
+    db.getMediaFiles()
   ]);
+
+  // Resolve logo URL from media ID
+  const logoMediaId = settings.otherSocials?.logoMediaId;
+  const logoFile = logoMediaId ? mediaFiles.find(f => f.id === logoMediaId) : null;
+  const resolvedLogoUrl = logoFile ? logoFile.filepath : '';
+
+  // Resolve profile image URL from media ID
+  const profileMediaId = settings.otherSocials?.profileMediaId;
+  const profileFile = profileMediaId ? mediaFiles.find(f => f.id === profileMediaId) : null;
+  const resolvedProfileUrl = profileFile ? profileFile.filepath : '';
 
   return (
     <>
-      <Navbar logoUrl={settings.logoUrl} items={navbarItems} />
+      <Navbar logoUrl={resolvedLogoUrl} items={navbarItems} />
       <main>
-        <Hero hero={hero} settings={settings} />
+        <Hero hero={{ ...hero, logoUrl: resolvedProfileUrl }} settings={settings} />
         
         {navbarItems.find(i => i.href === '#achievements')?.isVisible && (
           <Achievements achievements={achievements} />
@@ -60,10 +72,10 @@ export default async function Home() {
         )}
         
         {navbarItems.find(i => i.href === '#contact')?.isVisible && (
-          <Contact settings={settings} />
+          <Contact settings={{ ...settings, logoUrl: resolvedLogoUrl }} />
         )}
       </main>
-      <Footer settings={settings} items={navbarItems} />
+      <Footer settings={{ ...settings, logoUrl: resolvedLogoUrl }} items={navbarItems} />
     </>
   );
 }

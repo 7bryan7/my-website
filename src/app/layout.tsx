@@ -15,9 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
       ogImage: '/uploads/og-image.jpg'
     };
 
-    const iconUrl = settings.logoUrl 
-      ? `${settings.logoUrl}?v=${encodeURIComponent(settings.logoUrl)}` 
-      : '/favicon.ico';
+    let iconUrl = '/favicon.ico';
+    const logoMediaId = settings.otherSocials?.logoMediaId;
+    if (logoMediaId) {
+      const mediaFiles = await db.getMediaFiles();
+      const logoFile = mediaFiles.find(f => f.id === logoMediaId);
+      if (logoFile) {
+        iconUrl = `${logoFile.filepath}?v=${logoFile.id}`;
+      }
+    }
 
     return {
       title: {
@@ -66,8 +72,13 @@ export default async function RootLayout({
   try {
     const db = await getDB();
     const settings = await db.getSettings();
-    if (settings.logoUrl) {
-      faviconUrl = `${settings.logoUrl}?v=${encodeURIComponent(settings.logoUrl)}`;
+    const logoMediaId = settings.otherSocials?.logoMediaId;
+    if (logoMediaId) {
+      const mediaFiles = await db.getMediaFiles();
+      const logoFile = mediaFiles.find(f => f.id === logoMediaId);
+      if (logoFile) {
+        faviconUrl = `${logoFile.filepath}?v=${logoFile.id}`;
+      }
     }
   } catch (e) {
     console.error('Failed to load settings in layout:', e);
