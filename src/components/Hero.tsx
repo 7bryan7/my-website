@@ -169,12 +169,6 @@ export default function Hero({ hero }: HeroProps) {
         <div className="hero-grid">
           <div className="hero-left-column">
             <div className="hero-content">
-              {hero.logoUrl && (
-                <div className="hero-logo-wrapper">
-                  <img src={hero.logoUrl} alt="Logo" className="hero-profile-logo" />
-                </div>
-              )}
-              
               <h1 className="hero-title text-balance">
                 <span className="hero-name">Bryan Roger B</span>
                 <span className="hero-subtitle">{hero.heading}</span>
@@ -213,14 +207,6 @@ export default function Hero({ hero }: HeroProps) {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="scroll-indicator">
-        <a href="#achievements" onClick={(e) => handleCtaClick(e, '#achievements')} aria-label="Scroll down">
-          <div className="mouse">
-            <div className="wheel"></div>
-          </div>
-        </a>
       </div>
 
       <style jsx>{`
@@ -291,22 +277,6 @@ export default function Hero({ hero }: HeroProps) {
           animation: fadeIn var(--transition-slow) forwards;
         }
 
-        .hero-logo-wrapper {
-          margin-bottom: 2rem;
-          padding: 6px;
-          border-radius: var(--radius-full);
-          background: linear-gradient(135deg, var(--accent), transparent);
-          box-shadow: var(--shadow-lg);
-        }
-
-        .hero-profile-logo {
-          width: 100px;
-          height: 100px;
-          border-radius: var(--radius-full);
-          object-fit: cover;
-          border: 4px solid var(--bg-secondary);
-        }
-
         .hero-title {
           display: flex;
           flex-direction: column;
@@ -363,58 +333,6 @@ export default function Hero({ hero }: HeroProps) {
         .hero-animation-container {
           width: 100%;
           height: 400px;
-        }
-
-        .scroll-indicator {
-          position: absolute;
-          bottom: 2.5rem;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 2;
-        }
-
-        .mouse {
-          width: 26px;
-          height: 42px;
-          border: 2px solid var(--text-muted);
-          border-radius: 20px;
-          display: flex;
-          justify-content: center;
-          padding-top: 8px;
-          opacity: 0.8;
-          transition: opacity var(--transition-fast), border-color var(--transition-fast);
-        }
-        
-        .mouse:hover {
-          opacity: 1;
-          border-color: var(--accent);
-        }
-
-        .wheel {
-          width: 4px;
-          height: 8px;
-          background-color: var(--accent);
-          border-radius: var(--radius-full);
-          animation: scroll 1.5s infinite;
-        }
-
-        @keyframes scroll {
-          0% { transform: translateY(0); opacity: 1; }
-          100% { transform: translateY(12px); opacity: 0; }
-        }
-
-        @media (min-width: 1200px) {
-          .scroll-indicator {
-            left: calc((100vw - 1200px) / 2 + 2rem);
-            transform: none;
-          }
-        }
-
-        @media (min-width: 768px) and (max-width: 1199px) {
-          .scroll-indicator {
-            left: 2rem;
-            transform: none;
-          }
         }
 
         @media (max-width: 991px) {
