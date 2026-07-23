@@ -12,6 +12,15 @@ import './admin.css';
 
 type ActiveTab = 'overview' | 'settings' | 'navbar' | 'achievements' | 'projects' | 'experience' | 'services' | 'media' | 'profile';
 
+interface UploadTask {
+  id: string;
+  name: string;
+  size: number;
+  progress: number;
+  status: 'waiting' | 'uploading' | 'completed' | 'failed';
+  error?: string;
+}
+
 function generateUUID(): string {
   if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
     return window.crypto.randomUUID();
@@ -49,6 +58,17 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Media Batch Upload states
+  const [uploadQueue, setUploadQueue] = useState<UploadTask[]>([]);
+  const [showUploadProgress, setShowUploadProgress] = useState(false);
+  const [isUploadingBatch, setIsUploadingBatch] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [duplicateBatch, setDuplicateBatch] = useState<{
+    files: File[];
+    duplicates: File[];
+    strategy: 'replace' | 'keep-both' | 'skip';
+  } | null>(null);
   
   // Editor state modals
   const [activeModal, setActiveModal] = useState<{
@@ -190,25 +210,133 @@ export default function AdminDashboard() {
   };
 
   // Media upload triggers
-  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    showToast('Uploading file...');
-    try {
-      const res = await fetch('/api/media', {
-        method: 'POST',
-        body: formData
+  const processSelectedFiles = (selectedFiles: File[]) => {
+    const ALLOWED_MIME_TYPES = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'application/pdf'
+    ];
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    
+    const validFiles: File[] = [];
+    const invalidFiles: { name: string; reason: string }[] = [];
+    
+    selectedFiles.forEach(file => {
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        invalidFiles.push({ name: file.name, reason: 'Only images (JPG/PNG/WEBP/SVG) and PDFs are allowed.' });
+      } else if (file.size > MAX_FILE_SIZE) {
+        invalidFiles.push({ name: file.name, reason: 'Exceeds 5MB size limit.' });
+      } else {
+        validFiles.push(file);
+      }
+    });
+    
+    if (invalidFiles.length > 0) {
+      alert('The following files were skipped:\n' + invalidFiles.map(f => `• ${f.name}: ${f.reason}`).join('\n'));
+    }
+    
+    if (validFiles.length === 0) return;
+    
+    // Check for duplicates
+    const duplicateFiles = validFiles.filter(file => 
+      mediaFiles.some(mf => mf.filename === file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_'))
+    );
+    
+    if (duplicateFiles.length > 0) {
+      setDuplicateBatch({
+        files: validFiles,
+        duplicates: duplicateFiles,
+        strategy: 'keep-both'
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
-      showToast('File uploaded successfully');
-      fetchDashboardData();
-    } catch (err: any) {
-      showToast(err.message || 'File upload failed');
+    } else {
+      executeUpload(validFiles, 'keep-both');
+    }
+  };
+
+  const executeUpload = async (files: File[], strategy: 'replace' | 'keep-both' | 'skip') => {
+    // Build upload tasks
+    const tasks: UploadTask[] = files.map(file => ({
+      id: generateUUID(),
+      name: file.name,
+      size: file.size,
+      progress: 0,
+      status: 'waiting'
+    }));
+    
+    setUploadQueue(tasks);
+    setShowUploadProgress(true);
+    setIsUploadingBatch(true);
+    
+    const limit = 3;
+    const pendingFiles = [...files];
+    
+    const runWorker = async () => {
+      while (pendingFiles.length > 0) {
+        const file = pendingFiles.shift();
+        if (!file) break;
+        
+        // Update task status
+        setUploadQueue(prev => prev.map(t => t.name === file.name ? { ...t, status: 'uploading', progress: 10 } : t));
+        
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('duplicateStrategy', strategy);
+          
+          const progressInterval = setInterval(() => {
+            setUploadQueue(prev => prev.map(t => {
+              if (t.name === file.name && t.status === 'uploading' && t.progress < 95) {
+                return { ...t, progress: t.progress + 15 };
+              }
+              return t;
+            }));
+          }, 200);
+
+          const res = await fetch('/api/media', {
+            method: 'POST',
+            body: formData
+          });
+          clearInterval(progressInterval);
+          
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Upload failed');
+          
+          setUploadQueue(prev => prev.map(t => t.name === file.name ? { ...t, status: 'completed', progress: 100 } : t));
+        } catch (err: any) {
+          console.error(`Upload failed for ${file.name}:`, err);
+          setUploadQueue(prev => prev.map(t => t.name === file.name ? { ...t, status: 'failed', error: err.message || 'Upload failed', progress: 100 } : t));
+        }
+      }
+    };
+    
+    const workers = Array.from({ length: Math.min(limit, files.length) }, runWorker);
+    await Promise.all(workers);
+    
+    showToast('Batch upload process completed');
+    fetchDashboardData();
+    setIsUploadingBatch(false);
+  };
+
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    processSelectedFiles(Array.from(files));
+    e.target.value = '';
+  };
+
+  const handleMediaDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDropFiles = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processSelectedFiles(Array.from(e.dataTransfer.files));
     }
   };
 
@@ -1189,20 +1317,42 @@ export default function AdminDashboard() {
 
               {/* Media Library Tab */}
               {activeTab === 'media' && (
-                <div className="animate-fade-in">
+                <div 
+                  className={`animate-fade-in drag-drop-zone ${isDragging ? 'dragging' : ''}`}
+                  onDragOver={handleMediaDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDropFiles}
+                  style={{ minHeight: '400px', display: 'flex', flexDirection: 'column', position: 'relative' }}
+                >
+                  {isDragging && (
+                    <div className="drag-drop-overlay">
+                      <div className="drag-drop-overlay-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: 48, height: 48, color: 'var(--accent)', marginBottom: '1rem', display: 'inline-block' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                        </svg>
+                        <h3>Drop files here to upload</h3>
+                        <p style={{ color: 'var(--text-secondary)' }}>Images and PDFs up to 5MB</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="dashboard-header">
                     <div>
                       <h1 className="dashboard-title">Media Library</h1>
-                      <p className="dashboard-subtitle">Upload and link certificates, image attachments, or resume PDFs (Max 5MB).</p>
+                      <p className="dashboard-subtitle">Upload and link certificates, image attachments, or resume PDFs (Max 5MB). Drag-and-drop supported.</p>
                     </div>
                     
                     <div className="file-input-wrapper">
-                      <button className="btn btn-primary">Upload File</button>
+                      <button className="btn btn-primary" disabled={isUploadingBatch}>
+                        {isUploadingBatch ? 'Uploading...' : 'Upload Files'}
+                      </button>
                       <input 
                         type="file" 
                         ref={fileInputRef} 
                         onChange={handleMediaUpload} 
                         accept="image/*,application/pdf"
+                        multiple
+                        disabled={isUploadingBatch}
                       />
                     </div>
                   </div>
@@ -1729,11 +1879,173 @@ export default function AdminDashboard() {
                 </button>
               </form>
             )}
+ 
+           </div>
+         </div>
+       )}
 
+      {/* Duplicate Files Modal */}
+      {duplicateBatch && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-card animate-fade-in" style={{ maxWidth: '500px', padding: '2rem' }}>
+            <h3 className="editor-card-title" style={{ marginBottom: '1rem' }}>Duplicate Files Detected</h3>
+            <p className="dashboard-subtitle" style={{ marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+              The following files already exist in your library. How would you like to resolve the conflicts?
+            </p>
+            
+            <div style={{ maxHeight: '120px', overflowY: 'auto', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', padding: '0.75rem', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
+              {duplicateBatch.duplicates.map(f => (
+                <div key={f.name} style={{ fontSize: '0.8rem', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>
+                  📄 {f.name}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <input 
+                  type="radio" 
+                  name="dup-strat" 
+                  checked={duplicateBatch.strategy === 'keep-both'} 
+                  onChange={() => setDuplicateBatch({ ...duplicateBatch, strategy: 'keep-both' })} 
+                />
+                Keep Both (auto-rename files)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <input 
+                  type="radio" 
+                  name="dup-strat" 
+                  checked={duplicateBatch.strategy === 'replace'} 
+                  onChange={() => setDuplicateBatch({ ...duplicateBatch, strategy: 'replace' })} 
+                />
+                Replace/Overwrite existing files
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <input 
+                  type="radio" 
+                  name="dup-strat" 
+                  checked={duplicateBatch.strategy === 'skip'} 
+                  onChange={() => setDuplicateBatch({ ...duplicateBatch, strategy: 'skip' })} 
+                />
+                Skip duplicate files
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setDuplicateBatch(null)} 
+                className="btn btn-outline"
+                style={{ padding: '0.5rem 1rem' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const strategy = duplicateBatch.strategy;
+                  const files = duplicateBatch.strategy === 'skip'
+                    ? duplicateBatch.files.filter(f => !duplicateBatch.duplicates.some(d => d.name === f.name))
+                    : duplicateBatch.files;
+                  setDuplicateBatch(null);
+                  if (files.length > 0) {
+                    executeUpload(files, strategy);
+                  }
+                }} 
+                className="btn btn-primary"
+                style={{ padding: '0.5rem 1rem' }}
+              >
+                Proceed Upload
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-    </div>
-  );
-}
+      {/* Floating Upload Progress Box */}
+      {showUploadProgress && uploadQueue.length > 0 && (
+        <div className="upload-progress-drawer glass-card">
+          <div className="upload-drawer-header">
+            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+              {isUploadingBatch 
+                ? `Uploading ${uploadQueue.filter(q => q.status === 'uploading' || q.status === 'waiting').length} items...`
+                : 'Upload process complete'
+              }
+            </span>
+            <button 
+              onClick={() => {
+                if (!isUploadingBatch) {
+                  setShowUploadProgress(false);
+                  setUploadQueue([]);
+                } else {
+                  showToast('Uploading in background. Please wait.');
+                }
+              }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="upload-drawer-body">
+            {/* Overall Progress */}
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <span>Overall progress</span>
+                <span>
+                  {Math.round(uploadQueue.reduce((acc, t) => acc + t.progress, 0) / uploadQueue.length)}%
+                </span>
+              </div>
+              <div style={{ height: '4px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    height: '100%', 
+                    backgroundColor: 'var(--accent)', 
+                    width: `${Math.round(uploadQueue.reduce((acc, t) => acc + t.progress, 0) / uploadQueue.length)}%`,
+                    transition: 'width 0.2s ease'
+                  }} 
+                />
+              </div>
+            </div>
+            
+            {/* File List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+              {uploadQueue.map(task => (
+                <div key={task.id} style={{ display: 'flex', flexDirection: 'column', padding: '0.25rem 0', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
+                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '70%', fontWeight: 500 }} title={task.name}>
+                      {task.name}
+                    </span>
+                    <span 
+                      style={{ 
+                        fontSize: '0.7rem', 
+                        fontWeight: 600,
+                        color: task.status === 'completed' ? 'var(--success)' : 
+                               task.status === 'failed' ? 'var(--danger)' : 
+                               task.status === 'uploading' ? 'var(--accent)' : 'var(--text-muted)'
+                      }}
+                    >
+                      {task.status === 'completed' && '✓ Done'}
+                      {task.status === 'failed' && '✗ Failed'}
+                      {task.status === 'uploading' && 'Uploading'}
+                      {task.status === 'waiting' && 'Waiting'}
+                    </span>
+                  </div>
+                  {task.status === 'uploading' && (
+                    <div style={{ height: '2px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '1px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', backgroundColor: 'var(--accent)', width: `${task.progress}%` }} />
+                    </div>
+                  )}
+                  {task.status === 'failed' && (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--danger)', marginTop: '0.1rem' }}>
+                      {task.error || 'Upload failed'}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+ 
+     </div>
+   );
+ }

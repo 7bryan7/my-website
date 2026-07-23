@@ -392,7 +392,12 @@ export class LocalDBProvider implements DBProvider {
 
   async saveMediaFile(file: MediaFile): Promise<MediaFile> {
     const data = await this.load();
-    data.mediaFiles.push(file);
+    const idx = data.mediaFiles.findIndex(m => m.id === file.id || m.filename === file.filename);
+    if (idx > -1) {
+      data.mediaFiles[idx] = file;
+    } else {
+      data.mediaFiles.push(file);
+    }
     await this.saveAll();
     return file;
   }

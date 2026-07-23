@@ -650,3 +650,77 @@ input:checked + .slider:before {
   margin-top: 1.5rem;
 }
 
+/* Drag and Drop Zone styling */
+.drag-drop-zone {
+  position: relative;
+  border: 2px dashed transparent;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.drag-drop-zone.dragging {
+  border-color: var(--accent);
+  background-color: rgba(99, 102, 241, 0.05); /* Slight accent color highlight */
+}
+
+.drag-drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+}
+
+.drag-drop-overlay-box {
+  background-color: var(--bg-secondary);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+/* Floating Upload Progress Box */
+.upload-progress-drawer {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 320px;
+  max-height: 320px;
+  z-index: 1010;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.upload-drawer-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text-secondary);
+}
+
+

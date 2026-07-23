@@ -39,6 +39,8 @@ export async function POST(req: Request) {
     // 2. Parse form-data
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const duplicateStrategy = (formData.get('duplicateStrategy') as string) || 'keep-both';
+    
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
@@ -51,13 +53,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'File size exceeds 5MB limit.' }, { status: 400 });
     }
 
-    // 4. Sanitize and make unique filename
+    // 4. Sanitize and resolve unique/duplicate filenames
     const cleanName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const ext = path.extname(cleanName);
     const base = path.basename(cleanName, ext);
-    const uniqueFilename = `${base}-${Date.now()}${ext}`;
 
     const db = await getDB();
+    const existingFiles = await db.getMediaFiles();
+    const existingFile = existingFiles.find(f => f.filename === cleanName);
+
+    let uniqueFilename = cleanName;
+    let targetId: string = crypto.randomUUID();
+
+    if (existingFile) {
+      if (duplicateStrategy === 'skip') {
+        return NextResponse.json({ success: true, skipped: true, file: existingFile });
+      } else if (duplicateStrategy === 'replace') {
+        uniqueFilename = cleanName;
+        targetId = existingFile.id;
+      } else {
+        // 'keep-both' - append timestamp to make it unique
+        uniqueFilename = `${base}-${Date.now()}${ext}`;
+        targetId = crypto.randomUUID();
+      }
+    } else {
+      uniqueFilename = cleanName;
+      targetId = crypto.randomUUID();
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -106,7 +129,7 @@ export async function POST(req: Request) {
 
     // Save metadata in database
     const mediaFile: MediaFile = {
-      id: crypto.randomUUID(),
+      id: targetId,
       filename: uniqueFilename,
       filepath,
       fileType: file.type,

@@ -571,7 +571,7 @@ export class SupabaseDBProvider implements DBProvider {
 
   async saveMediaFile(file: MediaFile): Promise<MediaFile> {
     const dbRow = mapMediaToDb(file);
-    const { error } = await supabase!.from('media_library').insert(dbRow);
+    const { error } = await supabase!.from('media_library').upsert(dbRow);
     if (error) throw error;
     return file;
   }
