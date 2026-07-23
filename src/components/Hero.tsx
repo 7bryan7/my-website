@@ -2,16 +2,27 @@
 
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { HeroSection } from '@/services/db';
+import { useEffect, useRef, useState } from 'react';
+import { HeroSection, SiteSettings } from '@/services/db';
 
 interface HeroProps {
   hero: HeroSection;
+  settings?: SiteSettings;
 }
 
-export default function Hero({ hero }: HeroProps) {
+export default function Hero({ hero, settings }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', listener);
+    return () => mediaQuery.removeEventListener('change', listener);
+  }, []);
 
   useEffect(() => {
     if (hero.animationType !== 'particles') return;
@@ -155,6 +166,27 @@ export default function Hero({ hero }: HeroProps) {
     }
   };
 
+  // Read CMS settings
+  const otherSocials = settings?.otherSocials || {};
+  const ribbonVisible = otherSocials.ribbonVisible !== 'false';
+  const flowingTextRaw = otherSocials.flowingText || "AI Practitioner, Tech Explorer, Blockchain Enthusiast";
+  const textArray = flowingTextRaw.split(',').map((s: string) => s.trim());
+  const separator = " • ";
+  const concatenatedText = textArray.join(separator) + separator;
+  
+  // Create a long continuous string for seamless looping
+  const repeatedText = Array(8).fill(concatenatedText).join('');
+  
+  // Animation speed configurations
+  const animSpeedRaw = otherSocials.animationSpeed || 'slow';
+  let duration = '25s';
+  if (animSpeedRaw === 'fast') duration = '12s';
+  if (animSpeedRaw === 'medium') duration = '18s';
+  if (animSpeedRaw.endsWith('s')) duration = animSpeedRaw; // allow direct input of e.g. "30s"
+
+  const ribbonColor = otherSocials.ribbonColor || 'var(--accent)';
+  const ribbonOpacity = parseFloat(otherSocials.ribbonOpacity || '0.85');
+
   return (
     <section id="home" className="hero-section" ref={containerRef}>
       {hero.animationType === 'particles' && (
@@ -202,8 +234,60 @@ export default function Hero({ hero }: HeroProps) {
           </div>
 
           <div className="hero-right-column">
-            <div className="hero-animation-container">
-              {/* Reserved for future interactive animation component */}
+            <div className="hero-branding-wrapper" aria-label="Branded profile avatar visual">
+              <div className="profile-image-container">
+                <img 
+                  src={hero.logoUrl || '/uploads/logo.svg'} 
+                  alt="Bryan Roger B Profile Picture" 
+                  className="profile-picture" 
+                />
+              </div>
+
+              {ribbonVisible && (
+                <div className="flowing-ribbon-container">
+                  <svg viewBox="0 0 500 500" width="100%" height="100%" className="ribbon-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#818cf8" stopOpacity={ribbonOpacity} />
+                        <stop offset="50%" stopColor="#c084fc" stopOpacity={ribbonOpacity} />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity={ribbonOpacity} />
+                      </linearGradient>
+                      
+                      <path 
+                        id="textPathCurve" 
+                        d="M 20,320 C 120,400 200,420 250,400 C 300,380 380,360 480,310" 
+                        fill="none" 
+                      />
+                    </defs>
+
+                    <path 
+                      d="M 20,320 C 120,400 200,420 250,400 C 300,380 380,360 480,310" 
+                      fill="none" 
+                      stroke={ribbonColor === 'var(--accent)' ? 'url(#ribbonGrad)' : ribbonColor} 
+                      strokeWidth="38" 
+                      strokeLinecap="round"
+                      style={{
+                        filter: 'drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.35))',
+                      }}
+                    />
+
+                    <text fill="#ffffff" dy="5" style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                      <textPath href="#textPathCurve" startOffset="-100%">
+                        {repeatedText}
+                        {!prefersReducedMotion && (
+                          <animate 
+                            attributeName="startOffset" 
+                            from="-100%" 
+                            to="0%" 
+                            dur={duration} 
+                            repeatCount="indefinite" 
+                          />
+                        )}
+                      </textPath>
+                    </text>
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -212,13 +296,14 @@ export default function Hero({ hero }: HeroProps) {
       <style jsx>{`
         .hero-section {
           position: relative;
-          height: 100vh;
+          min-height: 100vh;
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
           background-color: var(--bg-primary);
+          padding: 6rem 0 3rem;
         }
 
         .hero-canvas {
@@ -330,9 +415,73 @@ export default function Hero({ hero }: HeroProps) {
           justify-content: center;
         }
 
-        .hero-animation-container {
+        .hero-branding-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 480px;
+          height: 480px;
+        }
+
+        .profile-image-container {
+          position: relative;
+          width: 360px;
+          height: 360px;
+          border-radius: var(--radius-full);
+          padding: 4px;
+          background: linear-gradient(135deg, var(--accent), #c084fc);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+          animation: float-image 6s ease-in-out infinite;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+          z-index: 2;
+        }
+
+        .profile-image-container:hover {
+          transform: scale(1.04);
+          box-shadow: 0 30px 60px rgba(var(--accent-rgb), 0.3);
+        }
+
+        .profile-picture {
           width: 100%;
-          height: 400px;
+          height: 100%;
+          border-radius: var(--radius-full);
+          object-fit: cover;
+          border: 4px solid var(--bg-secondary);
+        }
+
+        .flowing-ribbon-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 3;
+          pointer-events: none;
+          animation: float-ribbon 5s ease-in-out infinite alternate;
+        }
+
+        .ribbon-svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        @keyframes float-image {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        @keyframes float-ribbon {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
         }
 
         @media (max-width: 991px) {
@@ -340,15 +489,38 @@ export default function Hero({ hero }: HeroProps) {
             grid-template-columns: 1.4fr 0.6fr;
             gap: 2rem;
           }
+
+          .hero-branding-wrapper {
+            width: 380px;
+            height: 380px;
+          }
+
+          .profile-image-container {
+            width: 280px;
+            height: 280px;
+          }
         }
 
         @media (max-width: 768px) {
           .hero-grid {
             grid-template-columns: 1fr;
+            gap: 1rem;
           }
 
           .hero-right-column {
-            display: none;
+            display: flex;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+          }
+
+          .hero-branding-wrapper {
+            width: 280px;
+            height: 280px;
+          }
+
+          .profile-image-container {
+            width: 200px;
+            height: 200px;
           }
 
           .hero-left-column {
@@ -377,6 +549,16 @@ export default function Hero({ hero }: HeroProps) {
             width: 100%;
             max-width: 300px;
             justify-content: center;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .profile-image-container,
+          .flowing-ribbon-container {
+            animation: none !important;
+          }
+          .profile-image-container:hover {
+            transform: none !important;
           }
         }
       `}</style>

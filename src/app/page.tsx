@@ -41,7 +41,7 @@ export default async function Home() {
     <>
       <Navbar logoUrl={settings.logoUrl} items={navbarItems} />
       <main>
-        <Hero hero={hero} />
+        <Hero hero={hero} settings={settings} />
         
         {navbarItems.find(i => i.href === '#achievements')?.isVisible && (
           <Achievements achievements={achievements} />

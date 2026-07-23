@@ -696,6 +696,111 @@ export default function AdminDashboard() {
 
                   <div className="glass-card editor-card">
                     <div className="editor-card-header">
+                      <h3 className="editor-card-title">Branding Ribbon Settings (Right Hero)</h3>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="switch" style={{ marginRight: '0.5rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={settings.otherSocials?.ribbonVisible !== 'false'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            otherSocials: {
+                              ...settings.otherSocials,
+                              ribbonVisible: e.target.checked ? 'true' : 'false'
+                            }
+                          })}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      <span className="form-label" style={{ display: 'inline' }}>Show Flowing Ribbon Around Profile Picture</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Flowing Text Words (comma-separated)</label>
+                      <input 
+                        type="text" 
+                        value={settings.otherSocials?.flowingText || 'AI Practitioner, Tech Explorer, Blockchain Enthusiast'} 
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          otherSocials: {
+                            ...settings.otherSocials,
+                            flowingText: e.target.value
+                          }
+                        })} 
+                        className="form-input" 
+                        placeholder="e.g. AI Practitioner, Tech Explorer, Blockchain Enthusiast"
+                      />
+                    </div>
+
+                    <div className="editor-grid-3">
+                      <div className="form-group">
+                        <label className="form-label">Text Loop Speed</label>
+                        <select 
+                          value={settings.otherSocials?.animationSpeed || 'slow'} 
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            otherSocials: {
+                              ...settings.otherSocials,
+                              animationSpeed: e.target.value
+                            }
+                          })}
+                          className="form-select"
+                        >
+                          <option value="slow">Slow & Elegant (25s)</option>
+                          <option value="medium">Balanced (18s)</option>
+                          <option value="fast">Energetic (12s)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Ribbon Base Color</label>
+                        <input 
+                          type="text" 
+                          value={settings.otherSocials?.ribbonColor || 'var(--accent)'} 
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            otherSocials: {
+                              ...settings.otherSocials,
+                              ribbonColor: e.target.value
+                            }
+                          })} 
+                          className="form-input" 
+                          placeholder="var(--accent) or #hex"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Ribbon Opacity (0.1 - 1.0)</label>
+                        <input 
+                          type="number" 
+                          step="0.05"
+                          min="0.1"
+                          max="1.0"
+                          value={settings.otherSocials?.ribbonOpacity || '0.85'} 
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            otherSocials: {
+                              ...settings.otherSocials,
+                              ribbonOpacity: e.target.value
+                            }
+                          })} 
+                          className="form-input" 
+                        />
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => saveCmsData('updateSettings', settings)} 
+                      className="btn btn-primary"
+                    >
+                      Save Ribbon Branding
+                    </button>
+                  </div>
+
+                  <div className="glass-card editor-card">
+                    <div className="editor-card-header">
                       <h3 className="editor-card-title">Contact & Social Info</h3>
                     </div>
 
